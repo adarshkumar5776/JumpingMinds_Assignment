@@ -12,6 +12,8 @@ Algorithm
 The Elevator allocation algorithm, within the save_request function, starts by checking for available elevators without maintenance or open doors. If none are available, an error is returned. The algorithm then calculates the distance from the new request's floor to the last requested floor, considering that the elevator will eventually reach this floor after completing the ongoing request.
 
 Distances and corresponding elevators are stored, sorted by distance in ascending order. The closest elevator is selected, and the user's request is associated with it. The request details, including the elevator and relevant floor information, are then saved in the database.
+
+
  DATABASE - POSTGRESQL
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -41,7 +43,9 @@ Response:
     ]
 }
 
+
 Save Request
+
 URL: elevators/save_user_request
 Method: POST
 Description: Save a user request and assign the most optimal elevator to the request.
@@ -57,6 +61,7 @@ Response:
 }
 
 Get Requests
+
 URL: elevators/{elevator_id}/get_user_requests
 Method: GET
 Description: Fetch all requests for a given elevator.
@@ -81,6 +86,7 @@ Response:
 ]
 
 Get Next Floor
+
 URL: elevators/{elevator_id}/get_next_floor
 Method: GET
 Description: Fetch the next destination floor for a given elevator.
@@ -92,6 +98,7 @@ Response:
 }
 
 Direction
+
 URL: elevators/{elevator_id}/direction
 Method: GET
 Description: Check the direction (up, down, or stationary) of the elevator.
@@ -103,6 +110,7 @@ Response:
 }
 
 Door status
+
 URL: elevators/{elevator_id}/door_status
 Method: POST
 Description: Toggle the door of the elevator (open or closed).
@@ -112,6 +120,7 @@ Response:
 }
 
 Toggle Maintenance
+
 URL: elevators/{elevator_id}/toggle_maintenance
 Method: POST
 Description: Toggle the maintenance status of an elevator.
@@ -121,6 +130,7 @@ Response:
 }
 
 Move Elevator
+
 This is used to move an elevator from current floor to next floor for eg current floor is 1 and requested from is 5 and requested to is 7 then after hitting it one time it will move the elevator to the next floor which is requested from floor then hit it again then it will move the elevator to the requested to floor
 URL: /api/v1/elevators/{elevator_id}/move_elevator
 Method: POST
