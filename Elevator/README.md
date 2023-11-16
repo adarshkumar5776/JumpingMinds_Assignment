@@ -15,6 +15,7 @@ Distances and corresponding elevators are stored, sorted by distance in ascendin
 
 
  DATABASE - POSTGRESQL
+ 
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ElevatorDB',
