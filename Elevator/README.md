@@ -16,7 +16,7 @@ The elevator allocation algorithm, within the `save_request` function, checks fo
 
 PostgreSQL is used with the following configuration:
 
-
+```python
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ElevatorDB',
@@ -24,10 +24,11 @@ PostgreSQL is used with the following configuration:
         'PASSWORD':'******',
         'HOST':'localhost' 
     }
-
+```
 ### API
 
-#### Initialize System
+```python
+> Initialize System
 
 URL: elevators/initialize_elevators
 Method: POST
@@ -178,3 +179,4 @@ Response:
     "current_floor": 7,
     "previous_floor": 5
 }
+```
