@@ -1,9 +1,8 @@
 # JumpingMinds Backend Problem Statement
 
-In this challenge, you are asked to implement the business logic for a simplified elevator model in Python. We'll ignore a lot of what goes into a real world elevator, like physics, maintenance overrides, and optimizations for traffic patterns. All you are asked to do is to decide whether the elevator should go up, go down, or stop. 
-This needs to be built using Python & Django (Django Rest Framework specifically with Models, ViewSets, Serializers etc)
+> In this challenge, you are asked to implement the business logic for a simplified elevator model in Python. We'll ignore a lot of what goes into a real world elevator, like physics, maintenance overrides, and optimizations for traffic patterns. All you are asked to do is to decide whether the elevator should go up, go down, or stop. 
+>This needs to be built using Python & Django (Django Rest Framework specifically with Models, ViewSets, Serializers etc). An elevator system, which can be initialised with N elevators and maintains the elevator states as well.
 
-An elevator system, which can be initialised with N elevators and maintains the elevator states as well. 
 Assignment - "https://docs.google.com/document/d/1ZlJKfawiwqaEy2qoa0iAOB36Y0Ph5K2_zsvLcVJJBxk/edit"
 
 Solution -
@@ -26,7 +25,8 @@ Distances and corresponding elevators are stored, sorted by distance in ascendin
 
 
 API-
-Initialize System
+
+> Initialize System
 URL: elevators/initialize_elevators
 Method: POST
 Description: Initialize the elevator system with a specified number of elevators.
@@ -45,7 +45,7 @@ Response:
 }
 
 
-Save Request
+> Save Request
 
 URL: elevators/save_user_request
 Method: POST
@@ -61,7 +61,7 @@ Response:
     "elevator_id": 1
 }
 
-Get Requests
+> Get Requests
 
 URL: elevators/{elevator_id}/get_user_requests
 Method: GET
@@ -86,7 +86,7 @@ Response:
     }
 ]
 
-Get Next Floor
+> Get Next Floor
 
 URL: elevators/{elevator_id}/get_next_floor
 Method: GET
@@ -98,7 +98,7 @@ Response:
     "next_floor": 7
 }
 
-Direction
+> Direction
 
 URL: elevators/{elevator_id}/direction
 Method: GET
@@ -110,7 +110,7 @@ Response:
     "direction": "up"
 }
 
-Door status
+> Door status
 
 URL: elevators/{elevator_id}/door_status
 Method: POST
@@ -120,7 +120,7 @@ Response:
     "door_opened": true
 }
 
-Toggle Maintenance
+> Toggle Maintenance
 
 URL: elevators/{elevator_id}/toggle_maintenance
 Method: POST
@@ -130,7 +130,7 @@ Response:
     "message": "Elevator marked as in maintenance."
 }
 
-Move Elevator
+> Move Elevator
 
 This is used to move an elevator from current floor to next floor for eg current floor is 1 and requested from is 5 and requested to is 7 then after hitting it one time it will move the elevator to the next floor which is requested from floor then hit it again then it will move the elevator to the requested to floor
 URL: /api/v1/elevators/{elevator_id}/move_elevator
