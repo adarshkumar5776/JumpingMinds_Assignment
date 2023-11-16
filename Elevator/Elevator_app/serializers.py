@@ -10,4 +10,3 @@ class UserRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRequest
         fields = '__all__'
-        read_only_fields = ['elevator']

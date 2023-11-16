@@ -1,4 +1,5 @@
-from django.shortcuts import render
+import redis
+import json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from Elevator_app.serializers import ElevatorSerializer, UserRequestSerializer
@@ -8,15 +9,23 @@ from rest_framework.decorators import action
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-# Create your views here.
+"https://docs.google.com/document/d/1ZlJKfawiwqaEy2qoa0iAOB36Y0Ph5K2_zsvLcVJJBxk/edit"
 class ElevatorViewSet(viewsets.ModelViewSet):
     queryset = Elevator.objects.all()
     serializer_class = ElevatorSerializer
 
     @action(detail=False, methods=["post"])
     def initialize_elevators(self, request):
-        num_elevators = request.data.get("num_elevators")
+        """
+        Initializes the elevator system with the specified number of elevators.
+        Params: request - HTTP request with 'number_of_elevators' in data.
+        Returns: JsonResponse - Success message and elevator data with IDs.
+        Example: POST /initialize_elevators/ {"number_of_elevators": 3}
+        Response: {"message": "3 elevators initialized successfully", "elevators": [{"elevator_id": 1}, {"elevator_id": 2}, {"elevator_id": 3}]}
+        """
+        num_elevators = request.data.get("number_of_elevators")
         if not isinstance(num_elevators, int) or num_elevators <= 0:
             return Response(
                 {
@@ -39,6 +48,17 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def save_user_request(self, request):
+        """
+        API to save a user request and assign the most optimal elevator.
+        Parameters:
+            - request: HTTP request with 'requested_floor' and 'destination_floor' in data.
+        Returns:
+            - JsonResponse: Success message and assigned elevator ID.
+        Example:
+            >>> POST /save_user_request/ {"requested_floor": 2, "destination_floor": 6}
+            >>> Response: {"message": "User request saved successfully.", "elevator_id": 1}
+
+        """
         requested_from_floor = request.data.get("requested_floor")
         requested_to_floor = request.data.get("destination_floor")
         if (
@@ -49,13 +69,13 @@ class ElevatorViewSet(viewsets.ModelViewSet):
             or requested_from_floor <= 0
             or requested_to_floor <= 0
         ):
-            return Response(
+            return JsonResponse(
                 {"error": "Invalid floor number provided."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         elevators = Elevator.objects.filter(in_maintenance=False, is_door_open=False)
         if not elevators:
-            return Response(
+            return JsonResponse(
                 {"error": "No elevators available."}, status=status.HTTP_400_BAD_REQUEST
             )
         distances = []
@@ -87,14 +107,37 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def get_user_requests(self, request, pk=None):
+        """
+        Retrieve user requests for a specific elevator.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - Response: Serialized user requests.
+        Example: GET /get_user_requests/1/
+        Response: [{"requested_floor": 2, "destination_floor": 6, "is_complete": false, "created_at": "2023-01-01T12:00:00Z"}, ...]
+        """
+        # user_requests_cache = redis_client.get(f'user_requests_{pk}')
+        # if user_requests_cache:
+        #     return Response(json.loads(user_requests_cache))
         elevator = get_object_or_404(Elevator, pk=pk)
         requests = UserRequest.objects.filter(elevator=elevator)
         serializer = UserRequestSerializer(requests, many=True)
+        # user_requests_data = serializer.data
+        # redis_client.set(f'user_requests_{pk}', json.dumps(user_requests_data), ex=3600)
         return Response(serializer.data)
 
 
     @action(detail=True, methods=["get"])
     def get_next_floor(self, request, pk=None):
+        """
+        API to retrieve the next destination floor for a specific elevator.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - JsonResponse: Success message and next destination floor.
+        Example: GET /get_next_floor/1/
+        Response: {"message": "Next floor retrieved successfully.", "elevator_id": 1, "next_floor": 7}
+        """
         elevator = get_object_or_404(Elevator, pk=pk)
         current_floor = elevator.current_floor
         request = (
@@ -126,6 +169,15 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def check_direction(self, request, pk=None):
+        """
+        API to check the direction of a specific elevator.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - JsonResponse: Success message and elevator direction.
+        Example: GET /check_direction/1/
+        Response: {"message": "Direction retrieved successfully.", "elevator_id": 1, "direction": "up"}
+        """
         elevator = get_object_or_404(Elevator, pk=pk)
         if elevator.in_maintenance or elevator.is_door_open:
             return Response(
@@ -149,7 +201,6 @@ class ElevatorViewSet(viewsets.ModelViewSet):
             next_floor = requested_to_floor
         else:
             next_floor = requested_from_floor
-
         if next_floor > current_floor:
             direction = "up"
         elif next_floor < current_floor:
@@ -168,6 +219,15 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def door_status(self, pk=None):
+        """
+        API to toggle the door status of a specific elevator.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - JsonResponse: Current door status.
+        Example: POST /door_status/1/
+        Response: {"is_door_open": true}
+        """
         elevator = get_object_or_404(Elevator, pk=pk)
         elevator.door_opened = not elevator.is_door_open
         elevator.save()
@@ -176,6 +236,15 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def toggle_maintenance(self, request, pk=None):
+        """
+        API to toggle the maintenance status of a specific elevator.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - Response: Success message indicating the current maintenance status.
+        Example: POST /toggle_maintenance/1/
+        Response: {"message": "Elevator marked as in maintenance."}
+        """
         try:
             elevator = self.get_object()
             elevator.in_maintenance = not elevator.in_maintenance
@@ -195,6 +264,15 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def move_elevator(self, request, pk=None):
+        """
+        API to move a specific elevator to the requested floors.
+        Params:
+        - pk: Elevator ID.
+        Returns:
+        - JsonResponse: Success message and elevator details after the move.
+        Example: POST /move_elevator/1/
+        Response: {"message": "Elevator moved successfully.", "elevator_id": 1, "current_floor": 5, "previous_floor": 3}
+        """
         elevator = get_object_or_404(Elevator, pk=pk)
 
         if elevator.in_maintenance or elevator.is_door_open:
