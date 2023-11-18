@@ -12,6 +12,35 @@ In this challenge, you are asked to implement the business logic for a simplifie
 
 The elevator allocation algorithm, within the `save_request` function, checks for available elevators without maintenance or open doors. If none are available, an error is returned. The algorithm calculates the distance from the new request's floor to the last requested floor, considering that the elevator will eventually reach this floor after completing the ongoing request. Distances and corresponding elevators are stored, sorted by distance in ascending order. The closest elevator is selected, and the user's request is associated with it. The request details, including the elevator and relevant floor information, are then saved in the database.
 
+### Working
+
+1-ElevatorViewSet Class:
+Manages CRUD operations for Elevator objects.
+Includes custom actions like initialize_elevators, save_user_request, get_user_requests, get_next_floor, check_direction, door_status, toggle_maintenance, and move_elevator.
+
+2-initialize_elevators:
+Initializes the elevator system with a specified number of elevators.
+
+3- save_user_request:
+Saves a user request and assigns the most optimal elevator based on the current state of elevators and their distances.
+
+4-get_user_requests:
+Retrieves user requests for a specific elevator.
+
+5-get_next_floor:
+Retrieves the next destination floor for a specific elevator.
+6-check_direction:
+Checks the direction of a specific elevator based on its current state and user requests.
+
+7-door_status:
+Toggles the door status (open or closed) of a specific elevator.
+
+8-toggle_maintenance:
+Toggles the maintenance status of a specific elevator.
+
+9-move_elevator:
+Moves a specific elevator to the requested floors, updating its current and previous floor, and marking completed requests.
+
 ### Database
 
 PostgreSQL is used with the following configuration:
