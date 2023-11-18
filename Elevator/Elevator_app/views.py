@@ -218,7 +218,7 @@ class ElevatorViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=True, methods=["post"])
-    def door_status(self, pk=None):
+    def door_status(self, request, pk=None):
         """
         API to toggle the door status of a specific elevator.
         Params:
@@ -228,10 +228,14 @@ class ElevatorViewSet(viewsets.ModelViewSet):
         Example: POST /door_status/1/
         Response: {"is_door_open": true}
         """
-        elevator = get_object_or_404(Elevator, pk=pk)
-        elevator.door_opened = not elevator.is_door_open
-        elevator.save()
-        return JsonResponse({"is_door_open": elevator.is_door_open})
+        try:
+            elevator = self.get_object()
+            elevator.door_opened = not elevator.is_door_open #Using the not operator to invert the boolean value
+            elevator.save()
+            return Response({'door_opened': elevator.is_door_open})
+        except Elevator.DoesNotExist:
+            return Response({'error': 'Elevator not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
 
 
     @action(detail=True, methods=["post"])
